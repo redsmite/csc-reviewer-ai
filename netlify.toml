@@ -1,6 +1,7 @@
 [build]
   base = "backend"
   command = "pip install -r requirements.txt"
+  publish = "."
 
 [functions]
   directory = "."
@@ -9,3 +10,4 @@
   from = "/api/*"
   to = "/.netlify/functions/main/:splat"
   status = 200
+  force = true
