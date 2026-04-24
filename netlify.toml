@@ -4,8 +4,9 @@
   publish = "."
 
 [functions]
-  # Point to the folder relative to the 'base'
-  directory = "functions"
+  # We are telling Netlify EXACTLY where the file is
+  directory = "." 
+  included_files = ["main.py"]
 
 [[redirects]]
   from = "/api/*"
