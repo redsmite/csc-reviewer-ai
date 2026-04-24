@@ -4,6 +4,8 @@
   publish = "."
 
 [functions]
+  # This tells Netlify: "Hey, the function is this specific file!"
+  included_files = ["main.py"]
   directory = "."
 
 [[redirects]]
