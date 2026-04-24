@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "csc-reviewer-ph"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}

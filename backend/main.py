@@ -4,21 +4,12 @@ from pydantic import BaseModel
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+from mangum import Mangum
 
-# 1. Load the .env file
+# 1. Load the .env file (Only for local dev)
 load_dotenv()
 
-# 2. Get and clean the key
-raw_key = os.getenv("GEMINI_API_KEY", "")
-CLEAN_KEY = raw_key.strip().replace('"', '').replace("'", "")
-
-if not CLEAN_KEY:
-    print("❌ CRITICAL ERROR: GEMINI_API_KEY is not found in your .env file!")
-else:
-    print(f"✅ Key found (Starts with: {CLEAN_KEY[:4]}...)")
-    # This is the ONLY configuration line you need
-    genai.configure(api_key=CLEAN_KEY)
-
+# 2. Setup FastAPI App
 app = FastAPI(title="CSC Reviewer AI API")
 
 app.add_middleware(
@@ -28,6 +19,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 3. Configure Gemini
+# Netlify will provide this via its Environment Variables settings
+raw_key = os.getenv("GEMINI_API_KEY", "")
+CLEAN_KEY = raw_key.strip().replace('"', '').replace("'", "")
+
+if CLEAN_KEY:
+    genai.configure(api_key=CLEAN_KEY)
+else:
+    print("⚠️ Warning: GEMINI_API_KEY not found.")
+
+# --- MODELS ---
 
 class ExplainRequest(BaseModel):
     question: str
@@ -40,9 +43,10 @@ class ExplainResponse(BaseModel):
     explanation: str
     is_correct: bool
 
+# --- ROUTES ---
+
 @app.post("/explain", response_model=ExplainResponse)
 async def explain_answer(req: ExplainRequest):
-    # Standardize input to lowercase for mapping
     answer_letters = {"a": 0, "b": 1, "c": 2, "d": 3}
     correct_idx = answer_letters.get(req.correct_answer.lower(), 0)
     student_idx = answer_letters.get(req.student_answer.lower(), 0)
@@ -78,3 +82,7 @@ Provide a clear, concise explanation (2-4 sentences) of WHY the correct answer i
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+# --- NETLIFY HANDLER ---
+# This MUST be at the bottom so 'app' is fully defined before Mangum wraps it
+handler = Mangum(app)
