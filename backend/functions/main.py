@@ -86,3 +86,8 @@ async def health():
 # --- NETLIFY HANDLER ---
 # This MUST be at the bottom so 'app' is fully defined before Mangum wraps it
 handler = Mangum(app)
+
+if __name__ == "__main__":
+    import uvicorn
+    # This prevents the multiprocessing "bootstrap" error on Windows
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
